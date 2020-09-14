@@ -8,7 +8,7 @@ use r1cs_core::{ConstraintSystemRef, Namespace, SynthesisError};
 use crate::{
     fields::{FieldOpsBounds, FieldVar},
     prelude::*,
-    Assignment, Vec,
+    Vec,
 };
 
 /// This struct is the `R1CS` equivalent of the cubic extension field type
@@ -88,7 +88,7 @@ where
 {
     type Value = CubicExtField<P>;
 
-    fn cs(&self) -> Option<ConstraintSystemRef<P::BasePrimeField>> {
+    fn cs(&self) -> ConstraintSystemRef<P::BasePrimeField> {
         [&self.c0, &self.c1, &self.c2].cs()
     }
 
@@ -271,7 +271,7 @@ where
             AllocationMode::Witness
         };
         let inverse = Self::new_variable(
-            self.cs().get()?.clone(),
+            self.cs(),
             || {
                 self.value()
                     .map(|f| f.inverse().unwrap_or(CubicExtField::zero()))

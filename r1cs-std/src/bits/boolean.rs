@@ -231,10 +231,10 @@ pub enum Boolean<F: Field> {
 impl<F: Field> R1CSVar<F> for Boolean<F> {
     type Value = bool;
 
-    fn cs(&self) -> Option<ConstraintSystemRef<F>> {
+    fn cs(&self) -> ConstraintSystemRef<F> {
         match self {
-            Self::Is(a) | Self::Not(a) => Some(a.cs.clone()),
-            _ => None,
+            Self::Is(a) | Self::Not(a) => a.cs.clone(),
+            _ => ConstraintSystemRef::None,
         }
     }
 
@@ -402,11 +402,10 @@ impl<F: Field> Boolean<F> {
         match r {
             Constant(true) => Ok(()),
             Constant(false) => Err(SynthesisError::AssignmentMissing),
-            Is(_) | Not(_) => r.cs().unwrap().enforce_constraint(
-                r.lc(),
-                lc!() + Variable::One,
-                lc!() + Variable::One,
-            ),
+            Is(_) | Not(_) => {
+                r.cs()
+                    .enforce_constraint(r.lc(), lc!() + Variable::One, lc!() + Variable::One)
+            }
         }
     }
 
@@ -561,7 +560,7 @@ impl<F: Field> EqGadget<F> for Boolean<F> {
         };
 
         if condition != &Constant(false) {
-            let cs = self.cs().or(other.cs()).or(condition.cs()).unwrap();
+            let cs = self.cs().or(other.cs()).or(condition.cs());
             cs.enforce_constraint(lc!() + difference, condition.lc(), lc!())?;
         }
         Ok(())
@@ -597,11 +596,7 @@ impl<F: Field> EqGadget<F> for Boolean<F> {
         };
 
         if should_enforce != &Constant(false) {
-            let cs = self
-                .cs()
-                .or(other.cs())
-                .or(should_enforce.cs())
-                .ok_or(SynthesisError::UnconstrainedVariable)?;
+            let cs = self.cs().or(other.cs()).or(should_enforce.cs());
             cs.enforce_constraint(difference, should_enforce.lc(), should_enforce.lc())?;
         }
         Ok(())
@@ -638,7 +633,7 @@ impl<F: Field> CondSelectGadget<F> for Boolean<F> {
                 (&Constant(true), x) => cond.or(x),
                 (x, &Constant(true)) => cond.not().or(x),
                 (a, b) => {
-                    let cs = cond.cs().unwrap();
+                    let cs = cond.cs();
                     let result: Boolean<F> =
                         AllocatedBit::new_witness_without_booleanity_check(cs.clone(), || {
                             let cond = cond.value()?;
