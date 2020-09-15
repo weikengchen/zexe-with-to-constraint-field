@@ -4,7 +4,7 @@ use r1cs_core::{lc, ConstraintSystemRef, LinearCombination, Namespace, Synthesis
 use core::borrow::Borrow;
 
 use crate::fields::{FieldOpsBounds, FieldVar};
-use crate::{prelude::*, Assignment, Vec, ToConstraintFieldGadget};
+use crate::{prelude::*, Assignment, ToConstraintFieldGadget, Vec};
 
 pub mod cmp;
 

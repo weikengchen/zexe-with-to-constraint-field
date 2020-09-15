@@ -1,6 +1,6 @@
 use algebra::{BitIteratorBE, Field, PrimeField};
 
-use crate::{prelude::*, fields::fp::FpVar, Assignment, Vec, ToConstraintFieldGadget};
+use crate::{fields::fp::FpVar, prelude::*, Assignment, ToConstraintFieldGadget, Vec};
 use core::borrow::Borrow;
 use r1cs_core::{lc, ConstraintSystemRef, LinearCombination, Namespace, SynthesisError, Variable};
 
@@ -599,9 +599,7 @@ impl<F: Field> ToBytesGadget<F> for Boolean<F> {
 
 impl<F: PrimeField> ToConstraintFieldGadget<F> for Boolean<F> {
     #[tracing::instrument(target = "r1cs")]
-    fn to_constraint_field(
-        &self,
-    ) -> Result<Vec<FpVar<F>>, SynthesisError> {
+    fn to_constraint_field(&self) -> Result<Vec<FpVar<F>>, SynthesisError> {
         let var = <FpVar<F> as From<Boolean<F>>>::from(self.clone());
         Ok(vec![var])
     }

@@ -8,8 +8,8 @@ use algebra::{
 use core::{borrow::Borrow, marker::PhantomData};
 use r1cs_core::{ConstraintSystemRef, Namespace, SynthesisError};
 
-use crate::{prelude::*, Vec, ToConstraintFieldGadget};
 use crate::fields::fp::FpVar;
+use crate::{prelude::*, ToConstraintFieldGadget, Vec};
 
 pub mod bls12;
 pub mod mnt4;
@@ -88,7 +88,9 @@ where
     for<'a> &'a F: FieldOpsBounds<'a, P::BaseField, F>,
     F: ToConstraintFieldGadget<<P::BaseField as Field>::BasePrimeField>,
 {
-    fn to_constraint_field(&self) -> Result<Vec<FpVar<<P::BaseField as Field>::BasePrimeField>>, SynthesisError> {
+    fn to_constraint_field(
+        &self,
+    ) -> Result<Vec<FpVar<<P::BaseField as Field>::BasePrimeField>>, SynthesisError> {
         let mut res = Vec::<FpVar<<P::BaseField as Field>::BasePrimeField>>::new();
 
         res.extend_from_slice(&self.x.to_constraint_field()?);

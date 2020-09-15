@@ -5,8 +5,12 @@ use algebra::{
 use core::{borrow::Borrow, marker::PhantomData};
 use r1cs_core::{ConstraintSystemRef, Namespace, SynthesisError};
 
-use crate::{fields::{FieldOpsBounds, FieldVar}, prelude::*, Assignment, Vec, ToConstraintFieldGadget};
 use crate::fields::fp::FpVar;
+use crate::{
+    fields::{FieldOpsBounds, FieldVar},
+    prelude::*,
+    Assignment, ToConstraintFieldGadget, Vec,
+};
 
 #[derive(Derivative)]
 #[derivative(Debug(bound = "BF: core::fmt::Debug"), Clone(bound = "BF: Clone"))]
@@ -442,7 +446,7 @@ where
     BF: FieldVar<P::BaseField, P::BasePrimeField>,
     for<'a> &'a BF: FieldOpsBounds<'a, P::BaseField, BF>,
     P: CubicExtVarParams<BF>,
-    BF: ToConstraintFieldGadget<P::BasePrimeField>
+    BF: ToConstraintFieldGadget<P::BasePrimeField>,
 {
     #[tracing::instrument(target = "r1cs")]
     fn to_constraint_field(&self) -> Result<Vec<FpVar<P::BasePrimeField>>, SynthesisError> {
