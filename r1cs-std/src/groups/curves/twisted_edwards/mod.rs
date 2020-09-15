@@ -8,9 +8,10 @@ use algebra::{
 
 use r1cs_core::{ConstraintSystemRef, Namespace, SynthesisError};
 
-use crate::{prelude::*, Vec};
+use crate::{prelude::*, Vec, ToConstraintFieldGadget};
 
 use core::{borrow::Borrow, marker::PhantomData};
+use crate::fields::fp::FpVar;
 
 #[derive(Derivative)]
 #[derivative(Debug, Clone)]
@@ -643,6 +644,23 @@ where
         mode: AllocationMode,
     ) -> Result<Self, SynthesisError> {
         Self::new_variable(cs, || f().map(|b| b.borrow().into_projective()), mode)
+    }
+}
+
+impl<P, F> ToConstraintFieldGadget<<P::BaseField as Field>::BasePrimeField> for AffineVar<P, F>
+where
+    P: TEModelParameters,
+    F: FieldVar<P::BaseField, <P::BaseField as Field>::BasePrimeField>,
+    for<'a> &'a F: FieldOpsBounds<'a, P::BaseField, F>,
+    F: ToConstraintFieldGadget<<P::BaseField as Field>::BasePrimeField>,
+{
+    fn to_constraint_field(&self) -> Result<Vec<FpVar<<P::BaseField as Field>::BasePrimeField>>, SynthesisError> {
+        let mut res = Vec::<FpVar<<P::BaseField as Field>::BasePrimeField>>::new();
+
+        res.extend_from_slice(&self.x.to_constraint_field()?);
+        res.extend_from_slice(&self.y.to_constraint_field()?);
+
+        Ok(res)
     }
 }
 
